@@ -43,16 +43,10 @@ impl Blockchain {
         };
 
         blockchain.new_block(100, String::from("1"));
-        println!("create a new block {:?}", blockchain);
         blockchain
     }
 
     pub fn new_transaction(&mut self, sender: String, recipient: String, amount: f64) -> i64 {
-        println!("current transactions: {:?}", self.current_transactions);
-        println!(
-            "current transactions len: {:?}",
-            self.current_transactions.len()
-        );
         self.current_transactions.push(Transaction {
             sender,
             recipient,
@@ -107,6 +101,3 @@ impl Blockchain {
         &output[..4] == "0000"
     }
 }
-
-unsafe impl Send for Blockchain {}
-unsafe impl Sync for Blockchain {}
