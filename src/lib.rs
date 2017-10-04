@@ -127,7 +127,7 @@ impl Blockchain {
     }
 
     fn valid_chain(chain: &Vec<Block>) -> bool {
-        let mut last_block = chain.last().unwrap();
+        let mut last_block = chain.first().unwrap();
         let mut current_index = 1;
 
         while current_index < chain.len() {
