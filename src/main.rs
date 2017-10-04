@@ -50,19 +50,38 @@ fn mine() -> Json<Value> {
 #[get("/chain")]
 fn chain() -> Json<Value> {
     let blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
+
     Json(
-        json!({"chain": blockchain.chain, "lenght": blockchain.chain.len()}),
+        json!({"chain": blockchain.chain, "length": blockchain.chain.len()}),
     )
 }
 
 #[get("/nodes/resolve")]
-fn nodes_resolve() -> &'static str {
-    "nodes resolve"
+fn nodes_resolve() -> Json<Value> {
+    let mut blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
+
+    let message = if blockchain.resolve_conflicts() {
+        "Our chain was replaced"
+    } else {
+        "Our chain is authoritative"
+    };
+    Json(json!({"message": message, "chain": blockchain.chain}))
 }
 
-#[post("/nodes/register")]
-fn nodes_register() -> &'static str {
-    "nodes register"
+#[post("/nodes/register", format = "application/json", data = "<nodes>")]
+fn nodes_register(nodes: Json<Nodes>) -> Json<Value> {
+    if nodes.address.len() <= 0 {
+        return Json(json!({"error": "send some address"}));
+    }
+    let mut blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
+
+    for node in nodes.address.iter() {
+        blockchain.register_nodes(node.clone())
+    }
+
+    Json(
+        json!({"message": "New nodes have been added", "total_nodes": blockchain.chain.len()}),
+    )
 }
 
 #[post("/transaction/new", format = "application/json", data = "<transaction>")]
