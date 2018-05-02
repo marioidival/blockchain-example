@@ -13,8 +13,8 @@ serde_json = "1.0"
 serde_derive = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 rust-crypto = "^0.2"
-url = "*"
-hyper = "*"
+url = "1.6.0"
+hyper = "0.10.0"
 
 rocket = "0.3.3"
 rocket_codegen = "0.3.3"
