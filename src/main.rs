@@ -1,11 +1,15 @@
-#![feature(plugin)]
-#![plugin(rocket_codegen)]
+// #![feature(plugin)]
+// #![plugin(rocket_codegen)]
+#![feature(decl_macro)]
+#![feature(proc_macro_hygiene)]
 
-extern crate rocket;
+// extern crate rocket;
 extern crate serde;
 extern crate serde_json;
 extern crate blockchain;
 
+#[macro_use]
+extern crate rocket;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -14,16 +18,16 @@ extern crate rocket_contrib;
 extern crate serde_derive;
 
 use std::sync::Mutex;
-use rocket_contrib::{Json, Value};
+// use rocket_contrib::{Json, Value};
+use rocket_contrib::json::{Json, JsonValue};
 use blockchain::*;
-
 
 lazy_static! {
     static ref GLOBAL_BLOCKCHAIN: Mutex<Blockchain> = Mutex::new(Blockchain::new());
 }
 
 #[get("/mine")]
-fn mine() -> Json<Value> {
+fn mine() -> Json<JsonValue> {
     let mut blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
 
     let chain = blockchain.chain.to_vec();
@@ -48,7 +52,7 @@ fn mine() -> Json<Value> {
 }
 
 #[get("/chain")]
-fn chain() -> Json<Value> {
+fn chain() -> Json<JsonValue> {
     let blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
 
     Json(
@@ -57,7 +61,7 @@ fn chain() -> Json<Value> {
 }
 
 #[get("/nodes/resolve")]
-fn nodes_resolve() -> Json<Value> {
+fn nodes_resolve() -> Json<JsonValue> {
     let mut blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
 
     let message = if blockchain.resolve_conflicts() {
@@ -69,7 +73,7 @@ fn nodes_resolve() -> Json<Value> {
 }
 
 #[post("/nodes/register", format = "application/json", data = "<nodes>")]
-fn nodes_register(nodes: Json<Nodes>) -> Json<Value> {
+fn nodes_register(nodes: Json<Nodes>) -> Json<JsonValue> {
     if nodes.address.len() <= 0 {
         return Json(json!({"error": "send some address"}));
     }
@@ -85,7 +89,7 @@ fn nodes_register(nodes: Json<Nodes>) -> Json<Value> {
 }
 
 #[post("/transaction/new", format = "application/json", data = "<transaction>")]
-fn transactions(transaction: Json<Transaction>) -> Json<Value> {
+fn transactions(transaction: Json<Transaction>) -> Json<JsonValue> {
     let mut blockchain = GLOBAL_BLOCKCHAIN.lock().unwrap();
     let index = blockchain.new_transaction(
         transaction.sender.clone(),
